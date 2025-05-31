@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Copy Cat</title>
+    <link rel='stylesheet' type='text/css' href='./index.css' />
+  </head>
+  <body>
+    <div id='copy-cat'>
+
+      <div class='section'>
+        <div class='header' onclick='toggleSection(event)'>
+          Source Environment
+        </div>
+        <div class='body'>
+          <label>URL</label>
+          <input type='text' id='source-environment-url' value='' />
+          <label>API Key</label>
+          <input type='text' id='source-environment-api-key' value='' />
+          <br/>
+          <br/>
+          <button onclick='checkSourceEnvironment()'>Check</button>
+        </div>
+        <div id='source-environment-details'>
+          Environment not checked.
+        </div>
+      </div>
+
+      <div class='section'>
+        <div class='header' onclick='toggleSection(event)'>
+          Destination Environment
+        </div>
+        <div class='body'>
+          <label>URL</label>
+          <input type='text' id='destination-environment-url' value='' />
+          <label>API Key</label>
+          <input type='text' id='destination-environment-api-key' value='' />
+          <br/>
+          <br/>
+          <button onclick='checkDestinationEnvironment()'>Check</button>
+        </div>
+        <div id='destination-environment-details'>
+          Environment not checked.
+        </div>
+      </div>
+
+      <div class='section'>
+        <div class='header' onclick='toggleSection(event)'>
+          Select Form(s) to Copy
+        </div>
+        <div class='body'>
+          <label>Filter</label>
+          <input type='text' id='select-forms-filter' value='' placeholder='' />
+          <br/>
+          <br/>
+          <button onclick='fetchFormsToCopy()'>Search</button>
+          <br/>
+          <br/>
+          <div id='available-forms'></div>
+          <div id='available-forms-collapsed'></div>
+        </div>
+      </div>
+
+      <div class='section'>
+        <div class='header' onclick='toggleSection(event)'>
+          Copy Forms
+        </div>
+        <div class='body'>
+          <button onclick='copyForms()'>Copy Selected Forms</button>
+        </div>
+      </div>
+
+      <div class='section'>
+        <div class='header' onclick='toggleSection(event)'>
+          Event Log
+        </div>
+        <div class='body'>
+          <div id='log'></div>
+        </div>
+      </div>
+
+      <div id='loading-modal' class='loading-modal'>
+        <div id='loading-modal-bg' class='loading-modal-bg'></div>
+        <div id='loading-modal-fg' class='loading-modal-fg'>
+          Busy
+        </div>
+      </div>
+
+    </div>
+
+    <script src='./config.js'></script>
+    <script src='./constants/queries.js'></script>
+    <script src='./constants/mutations.js'></script>
+    <script src='./components/form.js'></script>
+    <script src='./healthie.js'></script>
+    <script src='./index.js'></script>
+  </body>
+</html>
