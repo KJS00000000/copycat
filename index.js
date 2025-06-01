@@ -13,6 +13,9 @@
   This script may be modified, shared, and reused as desired
 */
 
+// Initialize data
+let data = {};
+
 // Hide the loading modal
 LoadingModal.hide();
 
