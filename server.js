@@ -4,7 +4,7 @@ const url = require('url');
 
 // Configuration
 const PROXY_PORT = 8083;
-const TARGET_HOST = 'https://app.gethealthie.com'; // This should be your target server! 
+const TARGET_HOST = 'https://app.gethealthie.com';
 
 // Create HTTP server
 const server = http.createServer((req, res) => {

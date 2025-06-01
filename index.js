@@ -6,30 +6,6 @@
 // Updates to this script may be made in the future
 // This script may be modified, shared, and reused as desired
 
-
-function hideLoadingModal() {
-  let loadingModal = document.getElementById('loading-modal');
-  loadingModal.style.display = 'none';
-  loadingModal.style.visibility = 'hidden';
-}
-
-function showLoadingModal() {
-  let loadingModal = document.getElementById('loading-modal');
-  loadingModal.style.display = 'block';
-  loadingModal.style.visibility = 'visible';
-}
-
-function setLoadingModalText(text, append) {
-  console.log('... ' + text);
-  log(text);
-  let loadingModalFG = document.getElementById('loading-modal-fg');
-  if (append === true) {
-    loadingModalFG.innerHTML += '<br/>' + text;
-  } else {
-    loadingModalFG.innerHTML = text || 'Working';
-  }
-}
-
 function log(text) {
   let log = document.getElementById('log');
   log.innerHTML += '<br/>' + text;
@@ -45,7 +21,7 @@ function logInfo(text) {
   log.innerHTML += `<div class='info'>${text}</div>`;
 }
 
-hideLoadingModal();
+LoadingModal.hide();
 
 document.getElementById('source-environment-url').value = config.sourceEnvironment.url;
 document.getElementById('source-environment-api-key').value = config.sourceEnvironment.apiKey;
@@ -58,13 +34,14 @@ async function checkSourceEnvironment() {
   config.sourceEnvironment.url = document.getElementById('source-environment-url').value;
   config.sourceEnvironment.apiKey = document.getElementById('source-environment-api-key').value;
   
-  let result = await Healthie.api({
-    url: config.sourceEnvironment.url,
-    apiKey: config.sourceEnvironment.apiKey,
-    query: QUERY.CURRENT_USER,
-    variables: ''
-  });
   try {
+    let result = await Healthie.api({
+      url: config.sourceEnvironment.url,
+      apiKey: config.sourceEnvironment.apiKey,
+      query: QUERY.CURRENT_USER,
+      variables: ''
+    });
+
     config.sourceEnvironment.user_id = result.data.currentUser.id;
     config.sourceEnvironment.user_name = result.data.currentUser.name;
     config.sourceEnvironment.isValid = true;
@@ -91,13 +68,14 @@ async function checkDestinationEnvironment() {
   config.destinationEnvironment.url = document.getElementById('destination-environment-url').value;
   config.destinationEnvironment.apiKey = document.getElementById('destination-environment-api-key').value;
   
-  let result = await Healthie.api({
-    url: config.destinationEnvironment.url,
-    apiKey: config.destinationEnvironment.apiKey,
-    query: QUERY.CURRENT_USER,
-    variables: ''
-  });
   try {
+    let result = await Healthie.api({
+      url: config.destinationEnvironment.url,
+      apiKey: config.destinationEnvironment.apiKey,
+      query: QUERY.CURRENT_USER,
+      variables: ''
+    });
+
     config.destinationEnvironment.user_id = result.data.currentUser.id;
     config.destinationEnvironment.user_name = result.data.currentUser.name;
     config.destinationEnvironment.isValid = true;
@@ -170,8 +148,10 @@ async function copyForms() {
     return;
   }
 
-  showLoadingModal();
-  setLoadingModalText('Copying forms...');
+  LoadingModal.show();
+  LoadingModal.updateForeground({
+    html: 'Copying forms...'
+  });
   for (const formData of selectedForms) {
     if (formData.form.isSelected) {
       try{
@@ -183,11 +163,13 @@ async function copyForms() {
     }
   }
 
-  hideLoadingModal();
+  LoadingModal.hide();
 }
 
 async function copyForm(formId) {
-  setLoadingModalText('Copying form ' + formId + ' from ' + config.sourceEnvironment.url);
+  LoadingModal.updateForeground({
+    html: 'Copying form ' + formId + ' from ' + config.sourceEnvironment.url
+  });
   
   let fetchFormResult = await Healthie.api({
     url: config.sourceEnvironment.url,
@@ -227,8 +209,14 @@ async function copyForm(formId) {
   });
 
   let newCustomModuleFormId = createFormResult.data.createCustomModuleForm.customModuleForm.id;
-  setLoadingModalText('Created Form ' + newCustomModuleFormId + ' in ' + config.destinationEnvironment.url, true);
-  setLoadingModalText('Copying Form Modules', true);
+  LoadingModal.updateForeground({
+    html: `
+      Created Form ${newCustomModuleFormId} in ${config.destinationEnvironment.url}
+      <br/>
+      Copying Form Modules...
+    `,
+    append: true,
+  });
 
   customModuleFormToCopy.custom_modules.forEach(async (customModuleToCopy) => {
     let createCustomModuleInput = {

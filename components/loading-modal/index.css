@@ -1,0 +1,28 @@
+#loading-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+#loading-modal > .background {
+  height: 100%;
+  width: 100%;
+  background: black;
+  opacity: 0.9;
+}
+
+#loading-modal > .foreground {
+  position: fixed;
+  top: 25vh;
+  left: 50vw;
+  width: 50vw;
+  line-height: 50px;
+  margin-left: -25vw;
+  text-align: left;
+  font-size: 24px;
+  color: #dedede;
+  font-style: italic;
+}
