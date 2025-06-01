@@ -2,22 +2,7 @@ class Healthie {
 
   static async api(options) {
     console.log(options);
-
-log(`
-<div class='graphql'>
-GraphQL: ${options.url.trim()}
-</div>
-<pre class='graphql'>
-# Query / Mutation
-<br/>
-${options.query.trim()}
-</br>
-# Variables
-<br/>
-${JSON.stringify(options.variables, null, 2).trim()}
-</pre>
-</div>
-`);
+    Logger.logGraphQL(options);
 
     let body = {
       query: options.query || '',

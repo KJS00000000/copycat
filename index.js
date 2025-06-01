@@ -6,21 +6,6 @@
 // Updates to this script may be made in the future
 // This script may be modified, shared, and reused as desired
 
-function log(text) {
-  let log = document.getElementById('log');
-  log.innerHTML += '<br/>' + text;
-}
-
-function logError(text) {
-  let log = document.getElementById('log');
-  log.innerHTML += `<div class='error'>${text}</div>`;
-}
-
-function logInfo(text) {
-  let log = document.getElementById('log');
-  log.innerHTML += `<div class='info'>${text}</div>`;
-}
-
 LoadingModal.hide();
 
 document.getElementById('source-environment-url').value = config.sourceEnvironment.url;
@@ -29,7 +14,9 @@ document.getElementById('destination-environment-url').value = config.destinatio
 document.getElementById('destination-environment-api-key').value = config.destinationEnvironment.apiKey;
 
 async function checkSourceEnvironment() {
-  logInfo('Checking source environment');
+  Logger.log({
+    message: 'Checking source environment'
+  });
 
   config.sourceEnvironment.url = document.getElementById('source-environment-url').value;
   config.sourceEnvironment.apiKey = document.getElementById('source-environment-api-key').value;
@@ -64,7 +51,9 @@ function renderSourceEnvironmentDetails() {
 }
 
 async function checkDestinationEnvironment() {
-  logInfo('Checking destination environment');
+  Logger.log({
+    message: 'Checking destination environment'
+  });
   config.destinationEnvironment.url = document.getElementById('destination-environment-url').value;
   config.destinationEnvironment.apiKey = document.getElementById('destination-environment-api-key').value;
   
@@ -88,18 +77,39 @@ async function checkDestinationEnvironment() {
   renderDestinationEnvironmentDetails();
 }
 
-async function fetchFormsToCopy() {
+async function checkIfEnvironmentsAreValid() {
   await checkSourceEnvironment();
   if (!config.sourceEnvironment.isValid) {
-    logError('Source environment is not valid!');
-    return;
+    Logger.log({
+      message: 'Source environment is not valid!',
+      class: 'error'
+    });
+  } else {
+    Logger.log({
+      message: 'Source environment is valid!',
+      class: 'success'
+    });
   }
 
   await checkDestinationEnvironment();
-  console.log(config.destinationEnvironment.isValid);
-
   if (!config.destinationEnvironment.isValid) {
-    logError('Destination environment is not valid!');
+    Logger.log({
+      message: 'Destination environment is not valid!',
+      class: 'error'
+    });
+  } else {
+    Logger.log({
+      message: 'Destination environment is valid!',
+      class: 'success'
+    });
+  }
+
+  return config.sourceEnvironment.isValid && config.destinationEnvironment.isValid;
+}
+
+async function fetchFormsToCopy() {
+  let environmentsAreValid = checkIfEnvironmentsAreValid();
+  if (!environmentsAreValid) {
     return;
   }
 
@@ -123,14 +133,8 @@ async function fetchFormsToCopy() {
 }
 
 async function copyForms() {
-  await checkSourceEnvironment();
-  if (!config.sourceEnvironment.isValid) {
-    logError('Source environment is not valid!');
-    return;
-  }
-  await checkDestinationEnvironment();
-  if (!config.destinationEnvironment.isValid) {
-    logError('Destination environment is not valid!');
+  let environmentsAreValid = checkIfEnvironmentsAreValid();
+  if (!environmentsAreValid) {
     return;
   }
 
@@ -157,6 +161,10 @@ async function copyForms() {
       try{
         await copyForm(formData.id);
       } catch (e) {
+        Logger.log({
+          message: 'Errow while copying form!',
+          class: 'error'
+        });
         console.log('Error while copying form');
         console.log(e);
       }
@@ -230,7 +238,7 @@ async function copyForm(formId) {
       sublabel: customModuleToCopy.sublabel
     };
 
-    let createCustomModuleResult = await Healthie.api({
+    await Healthie.api({
       url: config.destinationEnvironment.url,
       apiKey: config.destinationEnvironment.apiKey,
       query: MUTATION.CREATE_CUSTOM_MODULE,
