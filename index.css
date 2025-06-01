@@ -106,30 +106,3 @@ button {
 .form > .content {
   display: inline-block;
 }
-
-div.graphql {
-  background: #ece6ff;
-  padding: 15px;
-  border-radius: 4px;
-}
-
-pre.graphql {
-  background: #f0f0f0;
-  padding: 15px;
-  border-radius: 4px;
-}
-
-div.error {
-  background: #f87676;
-  color: white;
-  margin-top: 15px;
-  padding: 15px;
-  border-radius: 4px;
-}
-
-div.info {
-  background: #c1e9ff;
-  margin-top: 15px;
-  padding: 15px;
-  border-radius: 4px;
-}
