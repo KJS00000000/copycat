@@ -1,3 +1,21 @@
+/*
+  WARNING - PLEASE USE CAUTION WHEN USING THESE SCRIPTS
+
+  Be sure to read and understand the consequences of using, modifying, and/or executing these scripts.
+
+  Purpose
+  This script will serve a simple Node JS proxy server from your local machine to Healthie's Production API. 
+  By default:
+    The local url will http://localhost:8083
+    The target url will be https://app.gethealthie.com
+
+  Disclaimer
+  The developer of this script assumes no responsability for it's use or any side effects of it's execution.
+  This script is not perfect and was recently written to provide guidance for copying forms via the Healthie API
+
+  This script may be modified, shared, and reused as desired
+*/
+
 const http = require('http');
 const https = require('https');
 const url = require('url');
