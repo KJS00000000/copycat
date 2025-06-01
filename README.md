@@ -13,7 +13,8 @@ NodeJS - For proxying requests
 ##### Configure (Optional)
 Open config.js and enter in `url` and `apiKey` details for sourceEnvironment.
 
-Staging URL: `https://staging-api.gethealthie.com/graphql`
+Staging URL: `https://staging-api.gethealthie.com/graphql`   
+
 Production URL (Proxied): `http://localhost:8083`
 
 <em>Note: This can also be done via the UI</em>
