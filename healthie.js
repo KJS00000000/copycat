@@ -1,7 +1,6 @@
 class Healthie {
 
   static async api(options) {
-    console.log(options);
     Logger.logGraphQL(options);
 
     let body = {

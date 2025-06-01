@@ -1,112 +1,29 @@
-// Please use caution when using these scripts!!! 
-// Please read and understand the consequences of using, modifying, and/or executing these scripts.
-// The developer of this script assumes no responsability for it's use or any side effects of it's execution.
-// This script can be used to copy form templates (CustomModuleForms) between Healthie Staging and Production
-// This script is not perfect and was recently written as a POC
-// Updates to this script may be made in the future
-// This script may be modified, shared, and reused as desired
+/* 
+  WARNING - PLEASE USE CAUTION WHEN USING THESE SCRIPTS
 
+  Be sure to read and understand the consequences of using, modifying, and/or executing these scripts.
+
+  Purpose
+  This script can be used to copy form templates (CustomModuleForms) between Healthie Staging and Production
+
+  Disclaimer
+  The developer of this script assumes no responsability for it's use or any side effects of it's execution.
+  This script is not perfect and was recently written to provide guidance for copying forms via the Healthie API
+
+  This script may be modified, shared, and reused as desired
+*/
+
+// Hide the loading modal
 LoadingModal.hide();
 
+// Initialize configuration variables
 document.getElementById('source-environment-url').value = config.sourceEnvironment.url;
 document.getElementById('source-environment-api-key').value = config.sourceEnvironment.apiKey;
 document.getElementById('destination-environment-url').value = config.destinationEnvironment.url;
 document.getElementById('destination-environment-api-key').value = config.destinationEnvironment.apiKey;
 
-async function checkSourceEnvironment() {
-  Logger.log({
-    message: 'Checking source environment'
-  });
-
-  config.sourceEnvironment.url = document.getElementById('source-environment-url').value;
-  config.sourceEnvironment.apiKey = document.getElementById('source-environment-api-key').value;
-  
-  try {
-    let result = await Healthie.api({
-      url: config.sourceEnvironment.url,
-      apiKey: config.sourceEnvironment.apiKey,
-      query: QUERY.CURRENT_USER,
-      variables: ''
-    });
-
-    config.sourceEnvironment.user_id = result.data.currentUser.id;
-    config.sourceEnvironment.user_name = result.data.currentUser.name;
-    config.sourceEnvironment.isValid = true;
-  } catch(e) {
-    config.sourceEnvironment.user_id = 'Invalid';
-    config.sourceEnvironment.user_name = 'Invalid';
-    config.sourceEnvironment.isValid = false;
-    console.log(e);
-  }
-  renderSourceEnvironmentDetails();
-}
-
-function renderSourceEnvironmentDetails() {
-  let element = document.getElementById('source-environment-details');
-  element.innerHTML = `
-    <b>User ID:</b>&nbsp;&nbsp;${config.sourceEnvironment.user_id}
-    &nbsp;&nbsp;
-    <b>User Name:</b>&nbsp;&nbsp;${config.sourceEnvironment.user_name}
-  `;
-}
-
-async function checkDestinationEnvironment() {
-  Logger.log({
-    message: 'Checking destination environment'
-  });
-  config.destinationEnvironment.url = document.getElementById('destination-environment-url').value;
-  config.destinationEnvironment.apiKey = document.getElementById('destination-environment-api-key').value;
-  
-  try {
-    let result = await Healthie.api({
-      url: config.destinationEnvironment.url,
-      apiKey: config.destinationEnvironment.apiKey,
-      query: QUERY.CURRENT_USER,
-      variables: ''
-    });
-
-    config.destinationEnvironment.user_id = result.data.currentUser.id;
-    config.destinationEnvironment.user_name = result.data.currentUser.name;
-    config.destinationEnvironment.isValid = true;
-  } catch(e) {
-    config.destinationEnvironment.user_id = 'Invalid';
-    config.destinationEnvironment.user_name = 'Invalid';
-    config.destinationEnvironment.isValid = false;
-    console.log(e);
-  }
-  renderDestinationEnvironmentDetails();
-}
-
-async function checkIfEnvironmentsAreValid() {
-  await checkSourceEnvironment();
-  if (!config.sourceEnvironment.isValid) {
-    Logger.log({
-      message: 'Source environment is not valid!',
-      class: 'error'
-    });
-  } else {
-    Logger.log({
-      message: 'Source environment is valid!',
-      class: 'success'
-    });
-  }
-
-  await checkDestinationEnvironment();
-  if (!config.destinationEnvironment.isValid) {
-    Logger.log({
-      message: 'Destination environment is not valid!',
-      class: 'error'
-    });
-  } else {
-    Logger.log({
-      message: 'Destination environment is valid!',
-      class: 'success'
-    });
-  }
-
-  return config.sourceEnvironment.isValid && config.destinationEnvironment.isValid;
-}
-
+// Fetch available forms from the source environment
+// Limited by page size
 async function fetchFormsToCopy() {
   let environmentsAreValid = checkIfEnvironmentsAreValid();
   if (!environmentsAreValid) {
@@ -132,6 +49,18 @@ async function fetchFormsToCopy() {
   }
 }
 
+// Render the available forms from the source environment
+function renderAvailableForms() {
+  let element = document.getElementById('available-forms');
+  element.innerHTML = '';
+  data.availableForms.forEach((formData) => {
+    let form = new Form(formData);
+    formData.form = form;
+    element.appendChild(form.element);
+  });
+}
+
+// Copy the selected forms from the source environment to the destination environment
 async function copyForms() {
   let environmentsAreValid = checkIfEnvironmentsAreValid();
   if (!environmentsAreValid) {
@@ -174,6 +103,7 @@ async function copyForms() {
   LoadingModal.hide();
 }
 
+// Copy a form from the source environment to the destination environment
 async function copyForm(formId) {
   LoadingModal.updateForeground({
     html: 'Copying form ' + formId + ' from ' + config.sourceEnvironment.url
@@ -250,6 +180,105 @@ async function copyForm(formId) {
 
 }
 
+// Check if the source and destination environments are valid
+async function checkIfEnvironmentsAreValid() {
+  await checkSourceEnvironment();
+  if (!config.sourceEnvironment.isValid) {
+    Logger.log({
+      message: 'Source environment is not valid!',
+      class: 'error'
+    });
+  } else {
+    Logger.log({
+      message: 'Source environment is valid!',
+      class: 'success'
+    });
+  }
+
+  await checkDestinationEnvironment();
+  if (!config.destinationEnvironment.isValid) {
+    Logger.log({
+      message: 'Destination environment is not valid!',
+      class: 'error'
+    });
+  } else {
+    Logger.log({
+      message: 'Destination environment is valid!',
+      class: 'success'
+    });
+  }
+
+  return config.sourceEnvironment.isValid && config.destinationEnvironment.isValid;
+}
+
+// Check if the source environment is valid
+async function checkSourceEnvironment() {
+  Logger.log({
+    message: 'Checking source environment'
+  });
+
+  config.sourceEnvironment.url = document.getElementById('source-environment-url').value;
+  config.sourceEnvironment.apiKey = document.getElementById('source-environment-api-key').value;
+
+  try {
+    let result = await Healthie.api({
+      url: config.sourceEnvironment.url,
+      apiKey: config.sourceEnvironment.apiKey,
+      query: QUERY.CURRENT_USER,
+      variables: ''
+    });
+
+    config.sourceEnvironment.user_id = result.data.currentUser.id;
+    config.sourceEnvironment.user_name = result.data.currentUser.name;
+    config.sourceEnvironment.isValid = true;
+  } catch(e) {
+    config.sourceEnvironment.user_id = 'Invalid';
+    config.sourceEnvironment.user_name = 'Invalid';
+    config.sourceEnvironment.isValid = false;
+    console.log(e);
+  }
+  renderSourceEnvironmentDetails();
+}
+
+// Render details about the source environment
+function renderSourceEnvironmentDetails() {
+  let element = document.getElementById('source-environment-details');
+  element.innerHTML = `
+    <b>User ID:</b>&nbsp;&nbsp;${config.sourceEnvironment.user_id}
+    &nbsp;&nbsp;
+    <b>User Name:</b>&nbsp;&nbsp;${config.sourceEnvironment.user_name}
+  `;
+}
+
+// Check if the destination environment is valid
+async function checkDestinationEnvironment() {
+  Logger.log({
+    message: 'Checking destination environment'
+  });
+  config.destinationEnvironment.url = document.getElementById('destination-environment-url').value;
+  config.destinationEnvironment.apiKey = document.getElementById('destination-environment-api-key').value;
+
+  try {
+    let result = await Healthie.api({
+      url: config.destinationEnvironment.url,
+      apiKey: config.destinationEnvironment.apiKey,
+      query: QUERY.CURRENT_USER,
+      variables: ''
+    });
+
+    config.destinationEnvironment.user_id = result.data.currentUser.id;
+    config.destinationEnvironment.user_name = result.data.currentUser.name;
+    config.destinationEnvironment.isValid = true;
+  } catch(e) {
+    config.destinationEnvironment.user_id = 'Invalid';
+    config.destinationEnvironment.user_name = 'Invalid';
+    config.destinationEnvironment.isValid = false;
+    console.log(e);
+  }
+  renderDestinationEnvironmentDetails();
+}
+
+// Render details about the destination environment
 function renderDestinationEnvironmentDetails() {
   let element = document.getElementById('destination-environment-details');
   element.innerHTML = `
@@ -259,16 +288,7 @@ function renderDestinationEnvironmentDetails() {
   `;
 }
 
-function renderAvailableForms() {
-  let element = document.getElementById('available-forms');
-  element.innerHTML = '';
-  data.availableForms.forEach((formData) => {
-    let form = new Form(formData);
-    formData.form = form;
-    element.appendChild(form.element);
-  });
-}
-
+// Helper for toggling sections of the DOM
 function toggleSection(jsEvent) {
   if (!jsEvent.target) {
     return;
