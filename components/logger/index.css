@@ -41,3 +41,9 @@
   padding: 15px;
   border-radius: 4px;
 }
+
+.logger > div.warning {
+  background: #ffc46b;
+  padding: 15px;
+  border-radius: 4px;
+}

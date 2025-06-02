@@ -5,12 +5,12 @@ These scripts can be used to copy form templates (CustomModuleForms) between Hea
 ### Requirements
 NodeJS - For proxying requests
 
-### Quick Start
-##### Clone the repo
+### Using the Utility
+#### Clone the repo
 ```
   git clone git@github.com:KJS00000000/copycat.git
 ```
-##### Configure (Optional)
+#### Configure
 Open config.js and enter in `url` and `apiKey` details for sourceEnvironment.
 
 Staging URL: `https://staging-api.gethealthie.com/graphql`   
@@ -19,10 +19,13 @@ Production URL (Proxied): `http://localhost:8083`
 
 <em>Note: This can also be done via the UI</em>
 ##### Start the proxy server
+##### SafeMode
+By default, the script is setup to run in SafeMode. This means that forms will not be copied, but you can check environments and log out the queries that would be made if SafeMode were set to false. SafeMode can be disabled in `config.js` by setting it to `false`. It is recommended to use SafeMode until you are familliar with the tool.
+
 ```
   node server.js
 ```
-##### Open index.html in your browser
+#### Open index.html in your browser
 Open the `index.html` file in your browser. 
 
 <em>Note: This has only been tested in Google Chrome</em>
@@ -43,4 +46,6 @@ Once you have selected the forms to copy, click the `Copy Forms` button to copy 
 Interactions will be logged in this section while interacting with the UI. You can look here to see the GraphQL requests that are being used.
 
 <em>Note: This log will clear on page reload!</em>
-
+#### TODO - Missing Feature(s)
+###### parent_custom_module_id
+CustomModules have a field for `parent_custom_module_id` that is not being populated at this time. You may need to update the script or run addtional mutations if your forms require this value. This will be updated in the future.

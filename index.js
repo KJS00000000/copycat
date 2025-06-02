@@ -15,6 +15,12 @@
 
 // Initialize data
 let data = {};
+if (config.SafeMode) {
+  Logger.log({
+    message: "SafeMode is enabled!<br/><br/>Forms will not be copied.<br/><br/>You can change this in config.js",
+    class: 'warning'
+  })
+}
 
 // Hide the loading modal
 LoadingModal.hide();
@@ -91,7 +97,7 @@ async function copyForms() {
   for (const formData of selectedForms) {
     if (formData.form.isSelected) {
       try{
-        await copyForm(formData.id);
+        await copyForm(formData);
       } catch (e) {
         Logger.log({
           message: 'Errow while copying form!',
@@ -107,7 +113,10 @@ async function copyForms() {
 }
 
 // Copy a form from the source environment to the destination environment
-async function copyForm(formId) {
+async function copyForm(formData) {
+  let formId = formData.id;
+  formData.createdCustomModulesIndexedByOriginalId = {};
+
   LoadingModal.updateForeground({
     html: 'Copying form ' + formId + ' from ' + config.sourceEnvironment.url
   });
@@ -120,6 +129,8 @@ async function copyForm(formId) {
       id: formId
     }
   });
+
+  console.log(fetchFormResult);
 
   let customModuleFormToCopy = fetchFormResult.data.customModuleForm;
 
@@ -140,16 +151,27 @@ async function copyForm(formId) {
     use_for_program: customModuleFormToCopy.use_for_program
   };
 
-  let createFormResult = await Healthie.api({
-    url: config.destinationEnvironment.url,
-    apiKey: config.destinationEnvironment.apiKey,
-    query: MUTATION.CREATE_CUSTOM_MODULE_FORM,
-    variables: {
-      input: createCustomModuleFormInput
-    }
-  });
+  console.log(createCustomModuleFormInput);
 
-  let newCustomModuleFormId = createFormResult.data.createCustomModuleForm.customModuleForm.id;
+  let newCustomModuleFormId;
+
+  if (!config.SafeMode) {
+    let createFormResult = await Healthie.api({
+      url: config.destinationEnvironment.url,
+      apiKey: config.destinationEnvironment.apiKey,
+      query: MUTATION.CREATE_CUSTOM_MODULE_FORM,
+      variables: {
+        input: createCustomModuleFormInput
+      }
+    });
+    newCustomModuleFormId = createFormResult.data.createCustomModuleForm.customModuleForm.id;
+  } else {
+    console.log('createCustomModuleFormInput: ', createCustomModuleFormInput);
+    newCustomModuleFormId = '... DRY RUN ...';
+  }
+
+  formData.newCustomModuleFormId = newCustomModuleFormId;
+
   LoadingModal.updateForeground({
     html: `
       Created Form ${newCustomModuleFormId} in ${config.destinationEnvironment.url}
@@ -159,7 +181,9 @@ async function copyForm(formId) {
     append: true,
   });
 
-  customModuleFormToCopy.custom_modules.forEach(async (customModuleToCopy) => {
+  // Create CustomModules for this CustomModuleForm
+  let counter = 1;
+  for (const customModuleToCopy of customModuleFormToCopy.custom_modules) {
     let createCustomModuleInput = {
       custom_module_form_id: newCustomModuleFormId,
       is_custom: customModuleToCopy.is_custom,
@@ -171,16 +195,53 @@ async function copyForm(formId) {
       sublabel: customModuleToCopy.sublabel
     };
 
-    await Healthie.api({
-      url: config.destinationEnvironment.url,
-      apiKey: config.destinationEnvironment.apiKey,
-      query: MUTATION.CREATE_CUSTOM_MODULE,
-      variables: {
-        input: createCustomModuleInput
-      }
-    });
-  });
+    if (!config.SafeMode) {
+      let createCustomModuleResponse = await Healthie.api({
+        url: config.destinationEnvironment.url,
+        apiKey: config.destinationEnvironment.apiKey,
+        query: MUTATION.CREATE_CUSTOM_MODULE,
+        variables: {
+          input: createCustomModuleInput
+        }
+      });
+      formData.createdCustomModulesIndexedByOriginalId[customModuleToCopy.id] = createCustomModuleResponse.data.createCustomModule.customModule.id;
+    } else {
+      console.log('createCustomModuleInput: ', createCustomModuleInput);
+      formData.createdCustomModulesIndexedByOriginalId[customModuleToCopy.id] = `... DRY RUN (${counter}) ...`
+      counter++;
+    }
+  }
 
+  // Update CustomModules with conditional logic
+  for (const customModuleToCopy of customModuleFormToCopy.custom_modules) {
+    if (customModuleToCopy.custom_module_condition) {
+      let createdCustomModuleId = formData.createdCustomModulesIndexedByOriginalId[customModuleToCopy.id];
+      let createdConditionalCustomModuleId = formData.createdCustomModulesIndexedByOriginalId[customModuleToCopy.custom_module_condition.conditional_custom_module_id];
+      let updateCustomModuleInput = {
+        id: createdCustomModuleId,
+        custom_module_condition: {
+          conditional_custom_module_id: createdConditionalCustomModuleId,
+          filter_type: customModuleToCopy.custom_module_condition.filter_type,
+          value_to_filter: customModuleToCopy.custom_module_condition.value_to_filter
+        }
+      };
+
+      if (!config.SafeMode) {
+        let updateCustomModuleResponse = await Healthie.api({
+          url: config.destinationEnvironment.url,
+          apiKey: config.destinationEnvironment.apiKey,
+          query: MUTATION.UPDATE_CUSTOM_MODULE,
+          variables: {
+            input: updateCustomModuleInput
+          }
+        });
+      } else {
+        console.log('updateCustomModuleInput: ', updateCustomModuleInput);
+      }
+    }
+  }
+
+  // TODO - Looking into updating CustomModules for parent_custom_module_id
 }
 
 // Check if the source and destination environments are valid
