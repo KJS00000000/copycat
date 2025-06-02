@@ -20,7 +20,7 @@ Production URL (Proxied): `http://localhost:8083/graphql`
 <em>Note: This can also be done via the UI</em>
 
 ##### SafeMode
-By default, the script is setup to run in SafeMode. This means that forms will NOT be copied, but you can check your nvironment configurations and log out the queries that would be made if SafeMode were set to false. SafeMode can be disabled in `config.js` by setting it to `false`. It is recommended to use SafeMode until you are familliar with the tool.
+By default, the script is setup to run in SafeMode. This means that forms will NOT be copied, but you can check your environment configurations and log out the queries that would be made if SafeMode were set to false. SafeMode can be disabled in `config.js` by setting it to `false`. It is recommended to use SafeMode until you are familliar with the tool.
 
 <em>Note: Any fields that would have been populated with newly created record ids will include `DRY RUN` in place the variable when SafeMode is enabled.</em>
 
