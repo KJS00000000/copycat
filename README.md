@@ -1,6 +1,6 @@
 # CopyCat
 ### Form Copy Utility
-These scripts can be used to copy form templates (CustomModuleForms) between Healthie's Staging and Production environments. They are mainly to be used to get an understanding of `how` you might use the Healthie API to fetch and create form templates.
+These scripts can be used to copy form templates (CustomModuleForms) between Healthie's Staging and Production environments. They are mainly to be used to get an understanding of how you might use the Healthie API to fetch and create form templates.
 
 ### Requirements
 NodeJS - For proxying requests
