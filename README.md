@@ -11,7 +11,7 @@ NodeJS - For proxying requests
   git clone git@github.com:KJS00000000/copycat.git
 ```
 #### Configure
-Open config.js and enter in `url` and `apiKey` details for sourceEnvironment.
+Open config.js and enter in `url` and `apiKey` details for both the `sourceEnvironment` and `destinationEnvironment`.
 
 Staging URL: `https://staging-api.gethealthie.com/graphql`   
 
@@ -20,7 +20,9 @@ Production URL (Proxied): `http://localhost:8083/graphql`
 <em>Note: This can also be done via the UI</em>
 
 ##### SafeMode
-By default, the script is setup to run in SafeMode. This means that forms will not be copied, but you can check environments and log out the queries that would be made if SafeMode were set to false. SafeMode can be disabled in `config.js` by setting it to `false`. It is recommended to use SafeMode until you are familliar with the tool.
+By default, the script is setup to run in SafeMode. This means that forms will NOT be copied, but you can check your nvironment configurations and log out the queries that would be made if SafeMode were set to false. SafeMode can be disabled in `config.js` by setting it to `false`. It is recommended to use SafeMode until you are familliar with the tool.
+
+<em>Note: Any fields that would have been populated with newly created record ids will include `DRY RUN` in place the variable when SafeMode is enabled.</em>
 
 ##### Start the proxy server
 ```
@@ -50,3 +52,5 @@ Interactions will be logged in this section while interacting with the UI. You c
 #### TODO - Missing Feature(s)
 ###### parent_custom_module_id
 CustomModules have a field for `parent_custom_module_id` that is not being populated at this time. You may need to update the script or run addtional mutations if your forms require this value. This will be updated in the future.
+###### Better error handling
+Be sure to keep an eye on the logs (both in the UI and in the Network traffic of your browser) for errors. This will be updated in the future.
