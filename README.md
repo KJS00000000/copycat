@@ -18,10 +18,11 @@ Staging URL: `https://staging-api.gethealthie.com/graphql`
 Production URL (Proxied): `http://localhost:8083`
 
 <em>Note: This can also be done via the UI</em>
-##### Start the proxy server
+
 ##### SafeMode
 By default, the script is setup to run in SafeMode. This means that forms will not be copied, but you can check environments and log out the queries that would be made if SafeMode were set to false. SafeMode can be disabled in `config.js` by setting it to `false`. It is recommended to use SafeMode until you are familliar with the tool.
 
+##### Start the proxy server
 ```
   node server.js
 ```
