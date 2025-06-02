@@ -4,13 +4,13 @@
   Be sure to read and understand the consequences of using, modifying, and/or executing these scripts.
 
   Purpose
-  This script can be used to copy form templates (CustomModuleForms) between Healthie Staging and Production
+  This script can be used to copy form templates (CustomModuleForms) between Healthie Staging and Production.
 
   Disclaimer
   The developer of this script assumes no responsability for it's use or any side effects of it's execution.
-  This script is not perfect and was recently written to provide guidance for copying forms via the Healthie API
+  This script is not perfect and was recently written to provide guidance for copying forms via the Healthie API.
 
-  This script may be modified, shared, and reused as desired
+  This script may be modified, shared, and reused as desired.
 */
 
 // Initialize data
@@ -42,8 +42,8 @@ async function fetchFormsToCopy() {
   config.selectFormsFilter = document.getElementById('select-forms-filter').value;
 
   let result = await Healthie.api({
-    url: config.destinationEnvironment.url,
-    apiKey: config.destinationEnvironment.apiKey,
+    url: config.sourceEnvironment.url,
+    apiKey: config.sourceEnvironment.apiKey,
     query: QUERY.CUSTOM_MODULE_FORMS,
     variables: {
       page_size: 10,
@@ -155,17 +155,20 @@ async function copyForm(formData) {
 
   let newCustomModuleFormId;
 
+  let createFormResultOptions = {
+    url: config.destinationEnvironment.url,
+    apiKey: config.destinationEnvironment.apiKey,
+    query: MUTATION.CREATE_CUSTOM_MODULE_FORM,
+    variables: {
+      input: createCustomModuleFormInput
+    }
+  };
+
   if (!config.SafeMode) {
-    let createFormResult = await Healthie.api({
-      url: config.destinationEnvironment.url,
-      apiKey: config.destinationEnvironment.apiKey,
-      query: MUTATION.CREATE_CUSTOM_MODULE_FORM,
-      variables: {
-        input: createCustomModuleFormInput
-      }
-    });
+    let createFormResult = await Healthie.api(createFormResultOptions);
     newCustomModuleFormId = createFormResult.data.createCustomModuleForm.customModuleForm.id;
   } else {
+    Logger.logGraphQL(createFormResultOptions);
     console.log('createCustomModuleFormInput: ', createCustomModuleFormInput);
     newCustomModuleFormId = '... DRY RUN ...';
   }
@@ -195,17 +198,20 @@ async function copyForm(formData) {
       sublabel: customModuleToCopy.sublabel
     };
 
+    let createCustomModuleOptions = {
+      url: config.destinationEnvironment.url,
+      apiKey: config.destinationEnvironment.apiKey,
+      query: MUTATION.CREATE_CUSTOM_MODULE,
+      variables: {
+        input: createCustomModuleInput
+      }
+    };
+
     if (!config.SafeMode) {
-      let createCustomModuleResponse = await Healthie.api({
-        url: config.destinationEnvironment.url,
-        apiKey: config.destinationEnvironment.apiKey,
-        query: MUTATION.CREATE_CUSTOM_MODULE,
-        variables: {
-          input: createCustomModuleInput
-        }
-      });
+      let createCustomModuleResponse = await Healthie.api(createCustomModuleOptions);
       formData.createdCustomModulesIndexedByOriginalId[customModuleToCopy.id] = createCustomModuleResponse.data.createCustomModule.customModule.id;
     } else {
+      Logger.logGraphQL(createCustomModuleOptions);
       console.log('createCustomModuleInput: ', createCustomModuleInput);
       formData.createdCustomModulesIndexedByOriginalId[customModuleToCopy.id] = `... DRY RUN (${counter}) ...`
       counter++;
@@ -226,16 +232,19 @@ async function copyForm(formData) {
         }
       };
 
+      let updateCustomModuleOptions = {
+        url: config.destinationEnvironment.url,
+        apiKey: config.destinationEnvironment.apiKey,
+        query: MUTATION.UPDATE_CUSTOM_MODULE,
+        variables: {
+          input: updateCustomModuleInput
+        }
+      };
+
       if (!config.SafeMode) {
-        let updateCustomModuleResponse = await Healthie.api({
-          url: config.destinationEnvironment.url,
-          apiKey: config.destinationEnvironment.apiKey,
-          query: MUTATION.UPDATE_CUSTOM_MODULE,
-          variables: {
-            input: updateCustomModuleInput
-          }
-        });
+        let updateCustomModuleResponse = await Healthie.api(updateCustomModuleOptions);
       } else {
+        Logger.logGraphQL(updateCustomModuleOptions);
         console.log('updateCustomModuleInput: ', updateCustomModuleInput);
       }
     }
