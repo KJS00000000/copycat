@@ -5,6 +5,13 @@ These scripts can be used to copy form templates (CustomModuleForms) between Hea
 ### Requirements
 NodeJS - For proxying requests
 
+### Quick Start
+```
+  git clone git@github.com:KJS00000000/copycat.git && cd copycat && open index.html
+
+  node server.js
+```
+
 ### Using the Utility
 #### Clone the repo
 ```
